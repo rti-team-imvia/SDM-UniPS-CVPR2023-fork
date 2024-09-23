@@ -11,6 +11,7 @@ from modules.io import dataio
 import sys
 import argparse
 import time
+from pathlib import Path
 
 sys.path.append('..')  # add parent directly for importing
 
@@ -20,13 +21,13 @@ parser = argparse.ArgumentParser()
 # Properties
 parser.add_argument('--session_name', default='sdm_unips')
 parser.add_argument('--target', default='normal_and_brdf', choices=['normal', 'brdf', 'normal_and_brdf'])
-parser.add_argument('--checkpoint', default='checkpoint')
+parser.add_argument('--checkpoint', type=Path, default=Path('checkpoint'))
 
 # Data Configuration
 parser.add_argument('--max_image_res', type=int, default=4096)
 parser.add_argument('--max_image_num', type=int, default=10)
 parser.add_argument('--test_ext', default='.data')
-parser.add_argument('--test_dir', default='DefaultTest')
+parser.add_argument('--test_dir', type=Path, default=Path('DefaultTest'))
 parser.add_argument('--test_prefix', default='L*')
 parser.add_argument('--mask_margin', type=int, default=8)
 
@@ -38,6 +39,9 @@ parser.add_argument('--scalable', action='store_true')
 
 def main():
     args = parser.parse_args()
+    args.checkpoint = args.checkpoint.resolve()
+    args.test_dir = args.test_dir.resolve()
+
     print(f'\nStarting a session: {args.session_name}')
     print(f'target: {args.target}\n')
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")

@@ -21,6 +21,22 @@ Unlike existing calibrated and uncalibrated photometric stereo tasks, which assu
 ### Step 1: Install Dependencies
 Follow instructions below.
 
+dvd(2024/09/23):
+```bash
+pyenv local 3.11.3 # If using pyenv only
+python -m venv .venv
+source .venv/Scripts/activate
+python -m pip install --upgrade pip
+pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu118 # This might change depending on the PC
+pip install opencv-python-headless
+pip install einops
+```
+
+Check installation by opening a new python session and typing:
+```python
+import torch;import cv2;print('PyTorch version:', torch.__version__, 'OpenCV version:', cv2.__version__)
+```
+
 ### Step 2: Image Acquisition
 Capture multiple images under various arbitrary lighting conditions with a fixed camera. Unlike existing photometric stereo methods, there is no assumption of directional lighting. However, please ensure that there is sufficient shading variation in all parts of the images. You can find tips for capture in the appendix of the paper.
 <p align="center">
