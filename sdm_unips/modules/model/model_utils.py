@@ -8,9 +8,9 @@ import os
 import torch
 import numpy as np
 
-def loadmodel(model, filename, strict=True):
+def loadmodel(model, filename, device,strict=True):
     if os.path.exists(filename):
-        params = torch.load('%s' % filename)
+        params = torch.load('%s' % filename, map_location=torch.device(device), weights_only=True)
         model.load_state_dict(params,strict=strict)
         print('Loading pretrained model... %s ' % filename)
     else:

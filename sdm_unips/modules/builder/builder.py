@@ -13,6 +13,7 @@ from modules.model.model_utils import *
 from modules.utils import compute_mae
 import cv2
 import glob
+from pathlib import Path
 
 class builder():
     def __init__(self, args, device):
@@ -21,16 +22,16 @@ class builder():
         self.args = args               
         """Load pretrained model (normal or brdf)"""
         if 'normal' in args.target:
-            model_dir = f'{args.checkpoint}/normal'
+            model_dir = Path(args.checkpoint) / 'normal'
             self.net_nml = model.Net(args.pixel_samples, 'normal', device).to(self.device)
             self.net_nml = torch.nn.DataParallel(self.net_nml)
-            self.net_nml = self.load_models(self.net_nml, model_dir)
+            self.net_nml = self.load_models(self.net_nml, model_dir, device)
             self.net_nml.module.no_grad()
         if 'brdf' in args.target:
-            model_dir = f'{args.checkpoint}/brdf'
+            model_dir = Path(args.checkpoint) / 'brdf'
             self.net_brdf = model.Net(args.pixel_samples, 'brdf', device).to(self.device)
             self.net_brdf = torch.nn.DataParallel(self.net_brdf)
-            self.net_brdf = self.load_models(self.net_brdf, model_dir)
+            self.net_brdf = self.load_models(self.net_brdf, model_dir, device)
             self.net_brdf.module.no_grad()
         print('')
 
@@ -45,9 +46,14 @@ class builder():
         roi = batch[4]
         return I, N, M, nImgArray, roi
 
-    def load_models(self, model, dirpath):
-        pytmodel = "".join(glob.glob(f'{dirpath}/*.pytmodel'))
-        model = loadmodel(model, pytmodel, strict=False)
+    def load_models(self, model, dirpath, device):
+        pytmodel_files = list(dirpath.glob('*.pytmodel'))
+        if pytmodel_files:
+            pytmodel = str(pytmodel_files[0])
+        else:
+            raise FileNotFoundError(f"No .pytmodel files found in {dirpath}")
+        
+        model = loadmodel(model, pytmodel, device, strict=False)
         return model
 
     def run(self, 
