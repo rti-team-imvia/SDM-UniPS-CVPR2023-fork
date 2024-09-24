@@ -30,6 +30,7 @@ python -m pip install --upgrade pip
 pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu118 # This might change depending on the PC
 pip install opencv-python-headless
 pip install einops
+pip install imageio
 ```
 
 Check installation by opening a new python session and typing:

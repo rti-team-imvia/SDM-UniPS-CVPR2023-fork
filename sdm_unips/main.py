@@ -38,6 +38,10 @@ parser.add_argument('--scalable', action='store_true')
 
 
 def main():
+    print('================================================================')
+    print('                         Running sdm_unips/main.py              ')
+    print('================================================================')
+
     args = parser.parse_args()
     args.checkpoint = args.checkpoint.resolve()
     args.test_dir = args.test_dir.resolve()

@@ -2,7 +2,7 @@
 checkpoint/
 SDM-Universal-PS-CVPR2023_Data/
 sdm_unips/modules/builder/__pycache__/builder.cpython-311.pyc
-
+out_head_cs_10/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
