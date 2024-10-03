@@ -2,16 +2,33 @@ import os
 import subprocess
 import shutil
 import sys
+import argparse
+from pathlib import Path
 
 def verify_sdm_in_folder(sdm_in_path):
     """
-    Verify if the SDM_in.data folder has the required 10 images. Raise an error if any are missing.
+    Verify if the SDM_in.data folder has at least 10 images with the pattern 'L (x).JPG'.
+    If more images are present, they will be logged. Raise an error if fewer than 10 are found.
     """
+    # Generate the expected filenames for the first 10 images
     required_images = [f"L ({i}).JPG" for i in range(1, 11)]
-    for image in required_images:
-        image_path = os.path.join(sdm_in_path, image)
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Missing file: {image_path}")
+    
+    # Collect all images that match the naming pattern 'L (x).JPG' in the folder
+    available_images = [f for f in os.listdir(sdm_in_path) if f.startswith("L (") and f.endswith(".JPG")]
+
+    # Check if there are at least 10 images
+    missing_images = [image for image in required_images if image not in available_images]
+
+    if missing_images:
+        raise FileNotFoundError(f"Missing required images: {', '.join(missing_images)}")
+
+    # Log if there are additional images beyond the first 10
+    extra_images = [image for image in available_images if image not in required_images]
+    
+    if extra_images:
+        print(f"Additional images found: {', '.join(extra_images)}")
+
+    print(f"Found {len(available_images)} valid images in {sdm_in_path}")
 
 def run_sdm_unips_main(test_dir, session_name, checkpoint_path, python_path):
     """
@@ -37,7 +54,7 @@ def run_sdm_unips_relighting(datadir, python_path):
 
 def copy_output_to_sdm_out(results_folder, destination_folder):
     """
-    Copy the output from the results folder to the SDM_out folder at the same level as SDM_in.data.
+    Copy the output from the results folder to the SDM_out folder inside the 'rti' folder.
     """
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
@@ -81,16 +98,17 @@ def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
                 # Step 3: Run sdm_unips/main.py
                 session_name = experiment_folder
                 test_dir = os.path.dirname(sdm_in_path)  # The parent folder of SDM_in.data
-                run_sdm_unips_main(test_dir, session_name, checkpoint_path, os.path.join(repository_path, r'.venv\Scripts\python.exe'))
+                run_sdm_unips_main(test_dir, session_name, checkpoint_path, os.path.join(repository_path, '.venv', 'Scripts', 'python.exe'))
                 print(f"Completed sdm_unips/main.py for {session_name}")
 
                 # Step 5: Run sdm_unips/relighting.py
                 results_data_dir = os.path.join(repository_path, session_name, "results", "SDM_in.data")
-                run_sdm_unips_relighting(results_data_dir, os.path.join(repository_path, r'.venv\Scripts\python.exe'))
+                run_sdm_unips_relighting(results_data_dir, os.path.join(repository_path, '.venv', 'Scripts', 'python.exe'))
                 print(f"Completed sdm_unips/relighting.py for {session_name}")
 
-                # Step 6: Move the results to the SDM_out folder
-                sdm_out_path = os.path.join(test_dir, "SDM_out")
+                # Step 6: Move the results to the SDM_out folder inside the 'rti' folder
+                rti_folder = os.path.join(test_dir, "rti")
+                sdm_out_path = os.path.join(rti_folder, "SDM_out")
                 copy_output_to_sdm_out(results_data_dir, sdm_out_path)
                 print(f"Moved output to {sdm_out_path}")
 
@@ -102,15 +120,37 @@ def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
             except Exception as e:
                 print(f"Error processing {experiment_path}: {e}")
 
+def main(input_folder):
+    """
+    Main function to handle argument parsing and trigger the processing.
+    """
+
+    # Ensure input path is a valid absolute path
+    input_folder = Path(args.input_folder).resolve()
+
+    # Assume repository_path is the current working directory
+    repository_path = Path.cwd()
+
+    # Checkpoint path is always inside the repository in the 'checkpoint' folder
+    checkpoint_path = repository_path / "checkpoint"
+
+    process_acquisition_folders(input_folder, str(repository_path), str(checkpoint_path))
+
 if __name__ == "__main__":
     print('================================================================')
-    print('                     Running run_sdm_multifoder.py              ')
+    print('                     Running run_sdm_multifolder.py              ')
+    print('================================================================') 
+    parser = argparse.ArgumentParser(description="Process SDM acquisition folders.")
+    parser.add_argument("--input_folder", type=str, help="Path to the input folder containing acquisition data.")
+
+    args = parser.parse_args()
+
+    """""""""
+    SHOW PARAMETERES CHOOSEN FOR THIS EXPERIMENT
+    """""""""  
+    for arg in vars(args):
+        print(f'{arg} : {getattr(args, arg)}')
+    print('================================================================')
     print('================================================================') 
 
-    # Define the paths
-    input_folder = r"F:\dvd\Palermo_3D\real acquisitions\head_cs"
-    repository_path = r"C:\Users\X-RTI\Documents\repos\SDM-UniPS-CVPR2023-fork" # Path to SDM-UniPS-CVPR2023-fork
-    checkpoint_path = r"C:\Users\X-RTI\Documents\repos\SDM-UniPS-CVPR2023-fork\checkpoint"
-
-    # Run the process
-    process_acquisition_folders(input_folder, repository_path, checkpoint_path)
+    main(args.input_folder)
