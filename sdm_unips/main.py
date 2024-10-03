@@ -13,7 +13,9 @@ import argparse
 import time
 from pathlib import Path
 
-sys.path.append('..')  # add parent directly for importing
+# Dynamically add the parent directory to sys.path for importing modules
+current_dir = Path(__file__).resolve().parent
+sys.path.append(str(current_dir.parent))
 
 # Argument parser
 parser = argparse.ArgumentParser()
@@ -43,25 +45,38 @@ def main():
     print('================================================================')
 
     args = parser.parse_args()
+
+    # Resolve paths to make them absolute
     args.checkpoint = args.checkpoint.resolve()
     args.test_dir = args.test_dir.resolve()
 
     print(f'\nStarting a session: {args.session_name}')
-    print(f'target: {args.target}\n')
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    print(f'Target: {args.target}\n')
+
+    # Detect GPU or fall back to CPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    # Initialize the model builder
     sdf_unips = builder.builder(args, device)
+    
+    # Load the test data
     test_data = dataio.dataio('Test', args)
 
     start_time = time.time()
+
+    # Run the model on the test data
     sdf_unips.run(testdata=test_data,
                   max_image_resolution=args.max_image_res,
                   canonical_resolution=args.canonical_resolution,
                   )
+    
     end_time = time.time()
-    print(f"Prediction finished (Elapsed time is {end_time - start_time:.3f} sec)")
+    print(f"Prediction finished (Elapsed time: {end_time - start_time:.3f} sec)")
+
+    # Instructions for running relighting script
     print("\nExecute the following script to render a video under new lighting conditions based on the generated BRDF and normal map.\n")
     print(f"        python sdm_unips/relighting.py --datadir ./{args.session_name}/results/{test_data.data.objname}\n")
-         
 
 
 if __name__ == '__main__':
