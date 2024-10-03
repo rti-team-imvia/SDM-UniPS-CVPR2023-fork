@@ -30,24 +30,24 @@ def verify_sdm_in_folder(sdm_in_path):
 
     print(f"Found {len(available_images)} valid images in {sdm_in_path}")
 
-def run_sdm_unips_main(test_dir, session_name, checkpoint_path, python_path):
+def run_sdm_unips_main(test_dir, session_name, checkpoint_path):
     """
-    Run the main sdm_unips script.
+    Run the main sdm_unips script using the same Python interpreter that runs this script.
     """
     subprocess.run([
-        python_path, "sdm_unips/main.py",
+        sys.executable, "sdm_unips/main.py",
         "--session_name", session_name,
         "--test_dir", test_dir,
         "--checkpoint", checkpoint_path,
         "--scalable"
     ], stdout=sys.stdout, stderr=sys.stderr, check=True)
 
-def run_sdm_unips_relighting(datadir, python_path):
+def run_sdm_unips_relighting(datadir):
     """
-    Run the relighting script.
+    Run the relighting script using the same Python interpreter that runs this script.
     """
     subprocess.run([
-        python_path, "sdm_unips/relighting.py",
+        sys.executable, "sdm_unips/relighting.py",
         "--datadir", datadir,
         "--format", "avi"
     ], stdout=sys.stdout, stderr=sys.stderr, check=True)
@@ -98,12 +98,12 @@ def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
                 # Step 3: Run sdm_unips/main.py
                 session_name = experiment_folder
                 test_dir = os.path.dirname(sdm_in_path)  # The parent folder of SDM_in.data
-                run_sdm_unips_main(test_dir, session_name, checkpoint_path, os.path.join(repository_path, '.venv', 'Scripts', 'python.exe'))
+                run_sdm_unips_main(test_dir, session_name, checkpoint_path)
                 print(f"Completed sdm_unips/main.py for {session_name}")
 
                 # Step 5: Run sdm_unips/relighting.py
                 results_data_dir = os.path.join(repository_path, session_name, "results", "SDM_in.data")
-                run_sdm_unips_relighting(results_data_dir, os.path.join(repository_path, '.venv', 'Scripts', 'python.exe'))
+                run_sdm_unips_relighting(results_data_dir)
                 print(f"Completed sdm_unips/relighting.py for {session_name}")
 
                 # Step 6: Move the results to the SDM_out folder inside the 'rti' folder
