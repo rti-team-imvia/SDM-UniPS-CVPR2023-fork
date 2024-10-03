@@ -25,7 +25,10 @@ dvd(2024/09/23):
 ```bash
 pyenv local 3.11.3 # If using pyenv only
 python -m venv .venv
-source .venv/Scripts/activate
+
+source .venv/Scripts/activate # Windows
+source .venv/bin/activate # Linux
+
 python -m pip install --upgrade pip
 pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu118 # This might change depending on the PC
 pip install opencv-python-headless
