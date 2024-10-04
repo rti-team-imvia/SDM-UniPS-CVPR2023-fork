@@ -1,0 +1,4 @@
+dvd(2024/10/04)
+- El script cheminova/run_sdm_multifolder.py está creando la salida en una nueva carpeta llamada "rti" dentro de la ya llamada carpeta "rti"
+entonces queda algo como /objeto/.../rti/rti/sdm_out . Hay que solucionar ese bug para evitar que mover eso manualmente
+- Añadir Custom exceptions y también logs
