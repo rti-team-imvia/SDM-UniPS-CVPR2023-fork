@@ -4,6 +4,7 @@ import shutil
 import sys
 import argparse
 from pathlib import Path
+from natsort import natsorted  # Import natsorted for natural sorting
 
 def verify_sdm_in_folder(sdm_in_path):
     """
@@ -73,7 +74,10 @@ def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
     """
     Process all acquisition folders and run the necessary scripts.
     """
-    for experiment_folder in os.listdir(input_folder):
+    # Get a naturally sorted list of folders
+    experiment_folders = natsorted(os.listdir(input_folder))
+
+    for experiment_folder in experiment_folders:
         experiment_path = os.path.join(input_folder, experiment_folder)
         if os.path.isdir(experiment_path):
             # Find the SDM_in.data folder
@@ -106,9 +110,10 @@ def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
                 run_sdm_unips_relighting(results_data_dir)
                 print(f"Completed sdm_unips/relighting.py for {session_name}")
 
-                # Step 6: Move the results to the SDM_out folder inside the 'rti' folder
+                # Step 6: Move the results to the existing SDM_out folder inside the 'rti' folder
                 rti_folder = os.path.join(test_dir, "rti")
-                sdm_out_path = os.path.join(rti_folder, "SDM_out")
+                sdm_out_path = os.path.join(rti_folder, "SDM_out")  # Use the existing rti/SDM_out path directly
+
                 copy_output_to_sdm_out(results_data_dir, sdm_out_path)
                 print(f"Moved output to {sdm_out_path}")
 

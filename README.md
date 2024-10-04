@@ -34,6 +34,7 @@ pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu11
 pip install opencv-python-headless
 pip install einops
 pip install imageio
+pip install natsort
 ```
 
 Check installation by opening a new python session and typing:
