@@ -8,23 +8,27 @@ from natsort import natsorted  # Import natsorted for natural sorting
 
 def verify_sdm_in_folder(sdm_in_path):
     """
-    Verify if the SDM_in.data folder has at least 10 images with the pattern 'L (x).JPG'.
+    Verify if the SDM_in.data folder has at least 10 images with the pattern 'L (x).JPG' or 'L (x).PNG'.
     If more images are present, they will be logged. Raise an error if fewer than 10 are found.
     """
     # Generate the expected filenames for the first 10 images
-    required_images = [f"L ({i}).JPG" for i in range(1, 11)]
+    required_images_jpg = [f"L ({i}).JPG" for i in range(1, 11)]
+    required_images_png = [f"L ({i}).PNG" for i in range(1, 11)]
     
-    # Collect all images that match the naming pattern 'L (x).JPG' in the folder
-    available_images = [f for f in os.listdir(sdm_in_path) if f.startswith("L (") and f.endswith(".JPG")]
-
-    # Check if there are at least 10 images
-    missing_images = [image for image in required_images if image not in available_images]
+    # Collect all images that match the naming pattern 'L (x).JPG' or 'L (x).PNG' in the folder
+    available_images = [f for f in os.listdir(sdm_in_path) if (f.startswith("L (") and (f.endswith(".JPG") or f.endswith(".PNG")))]
+    
+    # Check if there are at least 10 images, in either JPG or PNG format
+    missing_images = []
+    for jpg_image, png_image in zip(required_images_jpg, required_images_png):
+        if jpg_image not in available_images and png_image not in available_images:
+            missing_images.append(jpg_image)  # Log the image name without extension
 
     if missing_images:
         raise FileNotFoundError(f"Missing required images: {', '.join(missing_images)}")
 
     # Log if there are additional images beyond the first 10
-    extra_images = [image for image in available_images if image not in required_images]
+    extra_images = [image for image in available_images if image not in required_images_jpg and image not in required_images_png]
     
     if extra_images:
         print(f"Additional images found: {', '.join(extra_images)}")
@@ -111,7 +115,7 @@ def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
                 print(f"Completed sdm_unips/relighting.py for {session_name}")
 
                 # Step 6: Move the results to the existing SDM_out folder inside the 'rti' folder
-                rti_folder = os.path.join(test_dir, "rti")
+                rti_folder = os.path.join(test_dir)
                 sdm_out_path = os.path.join(rti_folder, "SDM_out")  # Use the existing rti/SDM_out path directly
 
                 copy_output_to_sdm_out(results_data_dir, sdm_out_path)
