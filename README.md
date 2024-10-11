@@ -37,6 +37,20 @@ pip install imageio
 pip install natsort
 ```
 
+dvd(2024/10/11) For cluster:
+```bash
+qlogin -q gpu
+module load python # Check which version with module avail python
+python -m venv .venv
+source .venv/bin/activate
+
+/work/imvia/de1450bo/repos/SDM-UniPS-CVPR2023-fork/.venv/bin/python -m pip install --upgrade pip
+/work/imvia/de1450bo/repos/SDM-UniPS-CVPR2023-fork/.venv/bin/python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+/work/imvia/de1450bo/repos/SDM-UniPS-CVPR2023-fork/.venv/bin/python -m pip install opencv-python-headless einops imageio natsort
+
+# run_sdm_multifolder example:
+/work/imvia/de1450bo/repos/SDM-UniPS-CVPR2023-fork/.venv/bin/python "cheminova/run_sdm_multifolder.py" --input_folder "/user1/imvia/de1450bo/data/bearPNG/"
+```
 Check installation by opening a new python session and typing:
 ```python
 import torch;import cv2;print('PyTorch version:', torch.__version__, 'OpenCV version:', cv2.__version__)
