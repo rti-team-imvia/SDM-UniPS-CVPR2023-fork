@@ -163,3 +163,5 @@ if __name__ == "__main__":
     print('================================================================') 
 
     main(args.input_folder)
+
+    # python "cheminova/run_sdm_multifolder.py" --input_folder "C:/Users/Deivid/Documents/DiLiGenT-MV/DiLiGenT-MV/mvpmsData/bearPNG"
