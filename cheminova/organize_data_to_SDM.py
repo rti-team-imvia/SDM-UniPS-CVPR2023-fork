@@ -9,7 +9,7 @@ def select_equally_spaced_images(image_list, num_images_to_select):
     """
     total_images = len(image_list)
     if total_images <= num_images_to_select:
-        return image_list  # If there are less or equal images, return all
+        return image_list  # If there are fewer or equal images, return all
     
     step = total_images // num_images_to_select
     selected_images = [image_list[i * step] for i in range(num_images_to_select)]
@@ -31,10 +31,24 @@ def copy_and_rename_images(src_folder, dst_folder, selected_images, VERBOSE):
         if VERBOSE:
             print(f"Copied and renamed: {src_image_path} -> {dst_image_path}")
 
+def copy_mask_image(rti_folder_path, sdm_in_folder, VERBOSE):
+    """
+    Copies the 'mask.png' file from the rti folder to the SDM_in.data folder.
+    """
+    mask_image_path = rti_folder_path / "mask.png"
+    if mask_image_path.exists():
+        dst_mask_path = sdm_in_folder / "mask.png"
+        shutil.copy(mask_image_path, dst_mask_path)
+        if VERBOSE:
+            print(f"Copied mask: {mask_image_path} -> {dst_mask_path}")
+    else:
+        if VERBOSE:
+            print(f"WARNING: 'mask.png' not found in {rti_folder_path}.")
+
 def process_rti_folders(input_folder, num_images, VERBOSE):
     """
     Main function that processes all subfolders in the input folder, finds the images in the 'rti' folder,
-    selects the requested number of equally spaced images, and copies/renames them into a new 'SDM_in' folder inside the 'rti' folder.
+    selects the requested number of equally spaced images, and copies/renames them into a new 'SDM_in.data' folder inside the 'rti' folder.
     """
     # Step 1: List all the folders in the input path
     input_folder = Path(input_folder)  # Convert to a Path object for cross-platform compatibility
@@ -61,6 +75,9 @@ def process_rti_folders(input_folder, num_images, VERBOSE):
                         
                         # Copy and rename the images into the SDM_in folder
                         copy_and_rename_images(rti_folder_path, sdm_in_folder, selected_images, VERBOSE)
+                        
+                        # Step 2.5: Copy the mask.png file if it exists
+                        copy_mask_image(rti_folder_path, sdm_in_folder, VERBOSE)
 
 if __name__ == "__main__":
 
@@ -78,7 +95,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     """""""""
-    SHOW PARAMETERES CHOOSEN FOR THIS EXPERIMENT
+    SHOW PARAMETERS CHOSEN FOR THIS EXPERIMENT
     """""""""  
     for arg in vars(args):
         print(f'{arg} : {getattr(args, arg)}')
@@ -87,3 +104,5 @@ if __name__ == "__main__":
 
     # Run the processing function with the provided input folder, number of images, and verbosity flag
     process_rti_folders(args.input_folder, args.num_images, args.verbose)
+
+# python "cheminova/organize_data_to_SMD.py" --input_folder "C:/Users/Deivid/Documents/DiLiGenT-MV/DiLiGenT-MV/mvpmsData/bearPNG" --verbose --num_images 10

@@ -31,6 +31,20 @@ def copy_and_rename_images(src_folder, dst_folder, selected_images, VERBOSE):
         if VERBOSE:
             print(f"Copied and renamed: {src_image_path} -> {dst_image_path}")
 
+def copy_mask_image(viewpoint_folder, sdm_in_folder, VERBOSE):
+    """
+    Copies the 'mask.png' file from the viewpoint folder to the SDM_in.data folder.
+    """
+    mask_image_path = viewpoint_folder / "mask.png"
+    if mask_image_path.exists():
+        dst_mask_path = sdm_in_folder / "mask.png"
+        shutil.copy(mask_image_path, dst_mask_path)
+        if VERBOSE:
+            print(f"Copied mask: {mask_image_path} -> {dst_mask_path}")
+    else:
+        if VERBOSE:
+            print(f"WARNING: 'mask.png' not found in {viewpoint_folder}.")
+
 def process_viewpoint_folders(input_folder, num_images, VERBOSE):
     """
     Main function that processes all viewpoint subfolders in the input folder,
@@ -41,7 +55,7 @@ def process_viewpoint_folders(input_folder, num_images, VERBOSE):
     for viewpoint_folder in input_folder.iterdir():
         if viewpoint_folder.is_dir() and viewpoint_folder.name.startswith("view_"):
             # Step 2: Identify the images with extension PNG, and sort them in ascending order
-            png_images = sorted([f for f in viewpoint_folder.iterdir() if f.suffix.lower() == '.png'])
+            png_images = sorted([f for f in viewpoint_folder.iterdir() if f.suffix.lower() == '.png' and f.name != "mask.png"])
             total_images_found = len(png_images)
 
             if png_images:
@@ -58,11 +72,14 @@ def process_viewpoint_folders(input_folder, num_images, VERBOSE):
                 
                 # Copy and rename the images into the SDM_in folder
                 copy_and_rename_images(viewpoint_folder, sdm_in_folder, selected_images, VERBOSE)
+                
+                # Step 5: Copy the mask.png file if it exists
+                copy_mask_image(viewpoint_folder, sdm_in_folder, VERBOSE)
 
 if __name__ == "__main__":
 
     print('================================================================')
-    print('             Oorganize_DiLiGenT-MV_to_SMD.py                    ')
+    print('             Organize_DiLiGenT-MV_to_SDM.py                    ')
     print('================================================================')   
 
     # Create an argument parser to accept command-line arguments
