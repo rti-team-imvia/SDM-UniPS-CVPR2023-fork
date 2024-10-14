@@ -35,7 +35,7 @@ def verify_sdm_in_folder(sdm_in_path):
 
     print(f"Found {len(available_images)} valid images in {sdm_in_path}")
 
-def run_sdm_unips_main(test_dir, session_name, checkpoint_path):
+def run_sdm_unips_main(test_dir, session_name, checkpoint_path, max_image_res, max_image_num):
     """
     Run the main sdm_unips script using the same Python interpreter that runs this script.
     """
@@ -44,6 +44,8 @@ def run_sdm_unips_main(test_dir, session_name, checkpoint_path):
         "--session_name", session_name,
         "--test_dir", test_dir,
         "--checkpoint", checkpoint_path,
+        "--max_image_res", max_image_res,
+        "--max_image_num", max_image_num,
         "--scalable"
     ], stdout=sys.stdout, stderr=sys.stderr, check=True)
 
@@ -74,7 +76,7 @@ def clean_up_repository_output(session_output_folder):
     """
     shutil.rmtree(session_output_folder)
 
-def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
+def process_acquisition_folders(input_folder, repository_path, checkpoint_path, max_image_res, max_image_num):
     """
     Process all acquisition folders and run the necessary scripts.
     """
@@ -106,7 +108,7 @@ def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
                 # Step 3: Run sdm_unips/main.py
                 session_name = experiment_folder
                 test_dir = os.path.dirname(sdm_in_path)  # The parent folder of SDM_in.data
-                run_sdm_unips_main(test_dir, session_name, checkpoint_path)
+                run_sdm_unips_main(test_dir, session_name, checkpoint_path, max_image_res, max_image_num)
                 print(f"Completed sdm_unips/main.py for {session_name}")
 
                 # Step 5: Run sdm_unips/relighting.py
@@ -129,7 +131,7 @@ def process_acquisition_folders(input_folder, repository_path, checkpoint_path):
             except Exception as e:
                 print(f"Error processing {experiment_path}: {e}")
 
-def main(input_folder):
+def main(input_folder, max_image_res, max_image_num):
     """
     Main function to handle argument parsing and trigger the processing.
     """
@@ -143,7 +145,7 @@ def main(input_folder):
     # Checkpoint path is always inside the repository in the 'checkpoint' folder
     checkpoint_path = repository_path / "checkpoint"
 
-    process_acquisition_folders(input_folder, str(repository_path), str(checkpoint_path))
+    process_acquisition_folders(input_folder, str(repository_path), str(checkpoint_path), max_image_res, max_image_num)
 
 if __name__ == "__main__":
     print('================================================================')
@@ -151,6 +153,8 @@ if __name__ == "__main__":
     print('================================================================') 
     parser = argparse.ArgumentParser(description="Process SDM acquisition folders.")
     parser.add_argument("--input_folder", type=str, help="Path to the input folder containing acquisition data.")
+    parser.add_argument('--max_image_res', type=int, default=4096)
+    parser.add_argument('--max_image_num', type=int, default=10)
 
     args = parser.parse_args()
 
@@ -162,6 +166,6 @@ if __name__ == "__main__":
     print('================================================================')
     print('================================================================') 
 
-    main(args.input_folder)
+    main(args.input_folder, args.max_image_res, args.max_image_num)
 
-    # python "cheminova/run_sdm_multifolder.py" --input_folder "C:/Users/Deivid/Documents/DiLiGenT-MV/DiLiGenT-MV/mvpmsData/bearPNG"
+    # python "cheminova/run_sdm_multifolder.py" --input_folder "C:/Users/Deivid/Documents/DiLiGenT-MV/DiLiGenT-MV/mvpmsData/bearPNG" --max_image_res 4096 --max_image_num 10
