@@ -44,8 +44,8 @@ def run_sdm_unips_main(test_dir, session_name, checkpoint_path, max_image_res, m
         "--session_name", session_name,
         "--test_dir", test_dir,
         "--checkpoint", checkpoint_path,
-        "--max_image_res", max_image_res,
-        "--max_image_num", max_image_num,
+        "--max_image_res", str(max_image_res),
+        "--max_image_num", str(max_image_num),
         "--scalable"
     ], stdout=sys.stdout, stderr=sys.stderr, check=True)
 

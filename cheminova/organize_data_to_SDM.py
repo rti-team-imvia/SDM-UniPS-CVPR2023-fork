@@ -105,4 +105,4 @@ if __name__ == "__main__":
     # Run the processing function with the provided input folder, number of images, and verbosity flag
     process_rti_folders(args.input_folder, args.num_images, args.verbose)
 
-# python "cheminova/organize_data_to_SMD.py" --input_folder "C:/Users/Deivid/Documents/DiLiGenT-MV/DiLiGenT-MV/mvpmsData/bearPNG" --verbose --num_images 10
+# python "cheminova/organize_data_to_SDM.py" --input_folder "C:/Users/Deivid/Documents/DiLiGenT-MV/DiLiGenT-MV/mvpmsData/bearPNG" --verbose --num_images 10
